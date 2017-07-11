@@ -1,5 +1,5 @@
 import optparse
-from _socket import gethostbyname, gethostbyaddr, setdefaulttimeout, socket, \
+from socket import gethostbyname, gethostbyaddr, setdefaulttimeout, socket, \
     AF_INET, SOCK_STREAM
 
 
@@ -9,29 +9,34 @@ def port_scan(target_host, target_ports):
     except:
         print("[-] Cannot resolve %s : Unknown host".format(target_host))
         return
+    print(type(target_ip))
+    target_host = target_ip
     try:
         target_name = gethostbyaddr(target_ip)
-        print('\n[+] Scan Results for: ' + target_name)
-    except:
+        if isinstance(target_name, str):
+            print('\n[+] Scan Results for: ' + target_name)
+    except Exception as e:
+        print(e)
         print('\n[+] Scan Results for: ' + target_ip)
-
-    setdefaulttimeout(1)
+    print(target_ip, target_host, target_name)
+    setdefaulttimeout(40)
 
     for target_port in target_ports:
         print('Scanning port ' + target_port)
-        connection_scan(target_host, int(target_port))
+        tcp_connect_scan(target_host, int(target_port))
 
 
-def connection_scan(target_host, target_port):
+def tcp_connect_scan(target_host, target_port):
     try:
         connection_socket = socket(AF_INET, SOCK_STREAM)
         connection_socket.connect((target_host, target_port))
-        connection_socket.send('Vpy\r\n')
+        connection_socket.send('ViolentPy\r\n')
         results = connection_socket.recv(100)
         print('[+]%d/tcp open' % target_port)
         print('[+] ' + str(results))
         connection_socket.close()
-    except:
+    except Exception as e:
+        print(e)
         print('[-]%d/tcp closed' % target_port)
 
 
